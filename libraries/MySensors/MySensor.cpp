@@ -75,6 +75,7 @@ void MySensor::begin(void (*_msgCallback)(const MyMessage &), uint8_t _nodeId, b
 
 	// Try to fetch node-id from gateway
 	if (nc.nodeId == AUTO) {
+		// TODO should find a node id
 		requestNodeId();
 	}
 
@@ -257,6 +258,23 @@ void MySensor::requestTime(void (* _timeCallback)(unsigned long)) {
 	sendRoute(build(msg, nc.nodeId, GATEWAY_ADDRESS, NODE_SENSOR_ID, C_INTERNAL, I_TIME, false).set(""));
 }
 
+void MySensor::setAddress(byte address) {
+	nc.nodeId = address;
+	if (nc.nodeId == AUTO) {
+		// sensor net gateway will return max id if all sensor id are taken
+		debug(PSTR("full\n"));
+		while (1); // Wait here. Nothing else we can do...
+	}
+	setupNode();
+	// Write id to EEPROM
+	// TODO This code should be called when setting id
+	eeprom_write_byte((uint8_t*)EEPROM_NODE_ID_ADDRESS, nc.nodeId);
+	debug(PSTR("id=%d\n"), nc.nodeId);
+}
+
+/**
+ * This method is called when a message is received.
+*/
 boolean MySensor::process() {
 	uint8_t pipe;
 	boolean available = RF24::available(&pipe);
@@ -269,8 +287,12 @@ boolean MySensor::process() {
 
 	// Add string termination, good if we later would want to print it.
 	msg.data[mGetLength(msg)] = '\0';
-	debug(PSTR("read: %d-%d-%d s=%d,c=%d,t=%d,pt=%d,l=%d:%s\n"),
-				msg.sender, msg.last, msg.destination,  msg.sensor, mGetCommand(msg), msg.type, mGetPayloadType(msg), mGetLength(msg), msg.getString(convBuf));
+	debug(PSTR("From %d through d to %d;\n"),
+				msg.sender, msg.last, msg.destination);
+	debug(PSTR("Sensor=%d Command=%d Type=%d\n"),
+				msg.sensor, mGetCommand(msg), msg.type);
+	debug(PSTR("Payload_type=%d,length=%d, data='%s'\n"),
+				mGetPayloadType(msg), mGetLength(msg), msg.getString(convBuf));
 
 	if(!(mGetVersion(msg) == PROTOCOL_VERSION)) {
 		debug(PSTR("version mismatch\n"));
@@ -335,6 +357,7 @@ boolean MySensor::process() {
 						}
 						setupNode();
 						// Write id to EEPROM
+						// TODO This code should be called when setting id
 						eeprom_write_byte((uint8_t*)EEPROM_NODE_ID_ADDRESS, nc.nodeId);
 						debug(PSTR("id=%d\n"), nc.nodeId);
 					}

@@ -166,6 +166,11 @@ class MySensor : public RF24
 	 */
 	void requestTime(void (* timeCallback)(unsigned long));
 
+	/**
+	 * Enables the setting of node address
+	 *
+	 */
+	void setAddress(byte address);
 
 	/**
 	 * Processes incoming messages to this node. If this is a relaying node it will
