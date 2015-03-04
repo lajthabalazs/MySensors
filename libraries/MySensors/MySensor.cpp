@@ -278,7 +278,7 @@ boolean MySensor::process() {
 
 	// Add string termination, good if we later would want to print it.
 	msg.data[mGetLength(msg)] = '\0';
-	debug(PSTR("From %d through d to %d;\n"),
+	debug(PSTR("From %d through %d to %d;\n"),
 				msg.sender, msg.last, msg.destination);
 	debug(PSTR("Sensor=%d Command=%d Type=%d\n"),
 				msg.sensor, mGetCommand(msg), msg.type);
