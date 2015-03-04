@@ -30,6 +30,11 @@ inline MyMessage& build (MyMessage &msg, uint8_t sender, uint8_t destination, ui
 MySensor::MySensor(uint8_t _cepin, uint8_t _cspin) : RF24(_cepin, _cspin) {
 }
 
+void MySensor::setAddress(byte address) {
+	eeprom_write_byte((uint8_t*)EEPROM_NODE_ID_ADDRESS, address);
+	debug(PSTR("id=%d\n"), address);
+}
+
 void MySensor::begin(void (*_msgCallback)(const MyMessage &), uint8_t _nodeId, boolean _repeaterMode, uint8_t _parentNodeId, rf24_pa_dbm_e paLevel, uint8_t channel, rf24_datarate_e dataRate) {
 	Serial.begin(BAUD_RATE);
 	isGateway = false;
@@ -256,20 +261,6 @@ void MySensor::request(uint8_t childSensorId, uint8_t variableType, uint8_t dest
 void MySensor::requestTime(void (* _timeCallback)(unsigned long)) {
 	timeCallback = _timeCallback;
 	sendRoute(build(msg, nc.nodeId, GATEWAY_ADDRESS, NODE_SENSOR_ID, C_INTERNAL, I_TIME, false).set(""));
-}
-
-void MySensor::setAddress(byte address) {
-	nc.nodeId = address;
-	if (nc.nodeId == AUTO) {
-		// sensor net gateway will return max id if all sensor id are taken
-		debug(PSTR("full\n"));
-		while (1); // Wait here. Nothing else we can do...
-	}
-	setupNode();
-	// Write id to EEPROM
-	// TODO This code should be called when setting id
-	eeprom_write_byte((uint8_t*)EEPROM_NODE_ID_ADDRESS, nc.nodeId);
-	debug(PSTR("id=%d\n"), nc.nodeId);
 }
 
 /**
