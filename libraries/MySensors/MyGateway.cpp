@@ -222,7 +222,8 @@ void MyGateway::setInclusionMode(boolean newMode) {
     }
 }
 
-void MyGateway::processRadioMessage() {
+int MyGateway::processRadioMessage() {
+	int ret = -1;
 	if (process()) {
 	  // A new message was received from one of the sensors
 	  MyMessage message = getLastMessage();
@@ -233,10 +234,12 @@ void MyGateway::processRadioMessage() {
 	  }
 	  // Pass along the message from sensors to serial line
 	  serial(message);
+	  ret = message.sensor;
 	}
 
 	checkButtonTriggeredInclusion();
 	checkInclusionFinished();
+	return ret;
 }
 
 void MyGateway::serial(const char *fmt, ... ) {

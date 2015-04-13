@@ -41,7 +41,7 @@ class MyGateway : public MySensor
 		/* Use this and pass a function that should be called when you want to process commands that arrive from radio network */
 		void begin(rf24_pa_dbm_e paLevel=RF24_PA_LEVEL_GW, uint8_t channel=RF24_CHANNEL, rf24_datarate_e dataRate=RF24_DATARATE, void (*dataCallback)(char *)=NULL);
 
-		void processRadioMessage();
+		int processRadioMessage();
 	    void parseAndSend(char *inputString);
 
 	private:
